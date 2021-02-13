@@ -4,7 +4,9 @@ package org.example.domain;
 import org.example.domain.enums.EmployeeJob;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class Employee {
     private Long empNo;
@@ -15,6 +17,7 @@ public class Employee {
     private Long salary;
     private Long commission;
     private Department department;
+    private SalaryGrade grade;
 
     public Employee(Long empNo, String name, EmployeeJob job,
                     LocalDate hiredate,
@@ -34,6 +37,13 @@ public class Employee {
 
     void appointDepartment(Department department) {
         this.department = department;
+    }
+
+    public void setSalaryGrade(final List<SalaryGrade> list) {
+        this.grade = list.stream()
+            .filter(x -> x.getLowSalary() <= this.salary && this.salary <= x.getHighSalary())
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException(this.name + " / " + this.salary + " 적절한 급여등급이 없습니다."));
     }
 
     public Long getEmpNo() {
@@ -79,6 +89,7 @@ public class Employee {
             ", salary=" + salary +
             ", commission=" + commission +
             ", department=" + department.getName() +
+            ", grade=" + grade.getGrade() +
             '}';
     }
 }

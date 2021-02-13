@@ -16,6 +16,8 @@ public class Scott {
         Department sales = new Department(30L, "SALES", "CHICAGO");
         Department operations = new Department(40L, "OPERATIONS", "BOSTON");
 
+        List<Department> departments = List.of(accounting, research, sales, operations);
+
         Random random = new Random();
 
         Employee smith = new Employee(7369L, "SMITH", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 800L, null);
@@ -53,6 +55,8 @@ public class Scott {
         research.addEmployees(smith, jones, scott, adams, ford);
         sales.addEmployees(allen, ward, martin, blake, turner, james);
 
+        List<Employee> employees = List.of(smith, allen, ward,
+            jones, martin, blake, clark, scott, king, turner, adams, james, ford, miller);
 
         // SalaryGrade
         SalaryGrade firstGrade = new SalaryGrade(1, 700L, 1200L);
@@ -61,21 +65,25 @@ public class Scott {
         SalaryGrade fourthGrade = new SalaryGrade(4, 2001L, 3000L);
         SalaryGrade fifthGrade = new SalaryGrade(5, 3001L, 9999L);
 
-        List<Department> departments = List.of(accounting, research, sales, operations);
+        List<SalaryGrade> grades = List.of(firstGrade, secondGrade, thirdGrade
+            , fourthGrade, fifthGrade);
+
+        // 직원별 SalaryGrade 를 적용.
+        employees.stream()
+            .forEach(x -> x.setSalaryGrade(grades));
+
         for (Department department : departments) {
             System.out.println(department);
         }
 
-        List<Employee> employees = List.of(smith, allen, ward,
-            jones, martin, blake, clark, scott, king, turner, adams, james, ford, miller);
         for (Employee employee : employees) {
             System.out.println(employee);
         }
 
-        List<SalaryGrade> grades = List.of(firstGrade, secondGrade, thirdGrade
-            , fourthGrade, fifthGrade);
         for (SalaryGrade grade : grades) {
             System.out.println(grade);
         }
+
+
     }
 }

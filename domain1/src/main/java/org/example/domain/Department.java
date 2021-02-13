@@ -13,7 +13,7 @@ public class Department {
     public Department(Long deptNumber, String deptName, String location) {
         this.deptNo = deptNumber;
         this.name = deptName;
-           this.location = location;
+        this.location = location;
     }
 
     public void addEmployees(Employee... employees) {
