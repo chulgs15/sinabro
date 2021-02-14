@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4d8c10dc-6954-4391-9114-8f85dc4c3462" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Scott.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Scott.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/domain/Department.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/domain/Department.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/domain/Employee.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/domain/Employee.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/Scott.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/Scott.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/domain/Employee.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/domain/Employee.class" afterDir="false" />
-    </list>
+    <list default="true" id="4d8c10dc-6954-4391-9114-8f85dc4c3462" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
