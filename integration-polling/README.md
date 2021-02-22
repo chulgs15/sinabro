@@ -1,4 +1,4 @@
-# Spring Integration - Student Registration
+# Spring Integration - Exchange Rate Registration
 
 # Hello World!
 
