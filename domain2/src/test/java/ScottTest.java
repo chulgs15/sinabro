@@ -66,24 +66,10 @@ public class ScottTest {
   @Test
   public void getEmployeeUpstreamHierarchy() {
     Employee starter = entityManager.find(Employee.class, 7839L);
+
+    // 주의! 재귀 호출 method 실행.
     System.out.println(starter);
-    printMember(starter, 0);
-  }
-
-  private void printMember(Employee manager, int level) {
-    // manager가 member 를 가지고 있는지 조회한다.
-    // member가 존재하면, 다시 printMember 를 재귀호출해서 데이터가 나타날때 까지 조회한다.
-    // member가 존재하지 않으면 재귀호출을 멈춘다.
-    List<Employee> members = manager.getMembers();
-
-    if (members.size() != 0) {
-      level++;
-      for (Employee member : members) {
-        System.out.printf("%" + (level + member.toString().length() + 3) + "s \n",
-            " └▶ " + member.toString());
-        printMember(member, level);
-      }
-    }
+    starter.printMember(starter, 0);
   }
 
   @Test
@@ -92,18 +78,8 @@ public class ScottTest {
 
     // 주의!! 재귀 호출 method 실행 부분
     System.out.println(starter);
-    printManager(starter, 0);
+    starter.printManager(starter, 0);
   }
 
-  private void printManager(Employee member, int level) {
-    // Manager 는 King 을 제외한 모든 직원이 1명은 지정했다.
-    // @ManyToOne 연관관계를 이용해서 승인권자를 그래프 탐색한다.
-    if (member.getManager() != null) {
-      level++;
-      System.out.printf("%" + (level + member.getManager().toString().length() + 3) + "s \n",
-          " └▶ " + member.getManager().toString());
 
-      printManager(member.getManager(), level);
-    }
-  }
 }
