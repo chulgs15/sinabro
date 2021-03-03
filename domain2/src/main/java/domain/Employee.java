@@ -35,7 +35,7 @@ public class Employee {
   private LocalDate hiredate;
 
   @Column(name = "sal")
-  private Long salary;
+  private Double salary;
 
   @Column(name = "comm")
   private Long commission;
@@ -51,7 +51,7 @@ public class Employee {
   }
 
   public Employee(Long empNo, String name, EmployeeJob job,
-                  LocalDate hiredate, Long salary, Long commission) {
+                  LocalDate hiredate, Double salary, Long commission) {
     this.empNo = empNo;
     this.name = name;
     this.job = job;
@@ -80,7 +80,7 @@ public class Employee {
     return hiredate;
   }
 
-  public Long getSalary() {
+  public Double getSalary() {
     return salary;
   }
 
@@ -126,7 +126,7 @@ public class Employee {
     this.salaryGrades = salaryGrades;
   }
 
-  public void changeSalary(Long salary) {
+  public void changeSalary(Double salary) {
     this.salary = salary;
   }
 

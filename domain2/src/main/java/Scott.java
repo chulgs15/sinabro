@@ -48,20 +48,20 @@ public class Scott {
 
     Random random = new Random();
 
-    Employee smith = new Employee(7369L, "SMITH", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 800L, null);
-    Employee allen = new Employee(7499L, "ALLEN", EmployeeJob.SALESMAN, LocalDate.now().minusDays(random.nextInt(50)), 1600L, 300L);
-    Employee ward = new Employee(7521L, "WARD", EmployeeJob.SALESMAN, LocalDate.now().minusDays(random.nextInt(50)), 1250L, 500L);
-    Employee jones = new Employee(7566L, "JONES", EmployeeJob.MANAGER, LocalDate.now().minusDays(random.nextInt(50)), 2975L, null);
-    Employee martin = new Employee(7654L, "MARTIN", EmployeeJob.SALESMAN, LocalDate.now().minusDays(random.nextInt(50)), 1250L, 1400L);
-    Employee blake = new Employee(7698L, "BLAKE", EmployeeJob.MANAGER, LocalDate.now().minusDays(random.nextInt(50)), 2850L, null);
-    Employee clark = new Employee(7782L, "CLARK", EmployeeJob.MANAGER, LocalDate.now().minusDays(random.nextInt(50)), 2450L, null);
-    Employee scott = new Employee(7788L, "SCOTT", EmployeeJob.ANALYST, LocalDate.now().minusDays(random.nextInt(50)), 3000L, null);
-    Employee king = new Employee(7839L, "KING", EmployeeJob.PRESIDENT, LocalDate.now().minusDays(random.nextInt(50)), 5000L, null);
-    Employee turner = new Employee(7844L, "TURNER", EmployeeJob.SALESMAN, LocalDate.now().minusDays(random.nextInt(50)), 1500L, 0L);
-    Employee adams = new Employee(7876L, "ADAMS", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 1100L, null);
-    Employee james = new Employee(7900L, "JAMES", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 950L, null);
-    Employee ford = new Employee(7902L, "FORD", EmployeeJob.ANALYST, LocalDate.now().minusDays(random.nextInt(50)), 3000L, null);
-    Employee miller = new Employee(7934L, "MILLER", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 1300L, null);
+    Employee smith = new Employee(7369L, "SMITH", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 800d, null);
+    Employee allen = new Employee(7499L, "ALLEN", EmployeeJob.SALESMAN, LocalDate.now().minusDays(random.nextInt(50)), 1600d, 300L);
+    Employee ward = new Employee(7521L, "WARD", EmployeeJob.SALESMAN, LocalDate.now().minusDays(random.nextInt(50)), 1250d, 500L);
+    Employee jones = new Employee(7566L, "JONES", EmployeeJob.MANAGER, LocalDate.now().minusDays(random.nextInt(50)), 2975d, null);
+    Employee martin = new Employee(7654L, "MARTIN", EmployeeJob.SALESMAN, LocalDate.now().minusDays(random.nextInt(50)), 1250d, 1400L);
+    Employee blake = new Employee(7698L, "BLAKE", EmployeeJob.MANAGER, LocalDate.now().minusDays(random.nextInt(50)), 2850d, null);
+    Employee clark = new Employee(7782L, "CLARK", EmployeeJob.MANAGER, LocalDate.now().minusDays(random.nextInt(50)), 2450d, null);
+    Employee scott = new Employee(7788L, "SCOTT", EmployeeJob.ANALYST, LocalDate.now().minusDays(random.nextInt(50)), 3000d, null);
+    Employee king = new Employee(7839L, "KING", EmployeeJob.PRESIDENT, LocalDate.now().minusDays(random.nextInt(50)), 5000d, null);
+    Employee turner = new Employee(7844L, "TURNER", EmployeeJob.SALESMAN, LocalDate.now().minusDays(random.nextInt(50)), 1500d, 0L);
+    Employee adams = new Employee(7876L, "ADAMS", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 1100d, null);
+    Employee james = new Employee(7900L, "JAMES", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 950d, null);
+    Employee ford = new Employee(7902L, "FORD", EmployeeJob.ANALYST, LocalDate.now().minusDays(random.nextInt(50)), 3000d, null);
+    Employee miller = new Employee(7934L, "MILLER", EmployeeJob.CLERK, LocalDate.now().minusDays(random.nextInt(50)), 1300d, null);
 
     // Manager-Member 연결 관계 결정.
     smith.changeManager(ford);

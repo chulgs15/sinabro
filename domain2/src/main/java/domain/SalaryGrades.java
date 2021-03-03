@@ -9,7 +9,7 @@ public class SalaryGrades {
     this.salaryGrades = salaryGrades;
   }
 
-  public SalaryGrade getSalaryGrade(Long salary) {
+  public SalaryGrade getSalaryGrade(Double salary) {
     return salaryGrades.stream()
         .filter(x -> salary >= x.getLowSalary() &&
             salary <= x.getHighSalary())

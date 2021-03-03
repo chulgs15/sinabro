@@ -1,6 +1,9 @@
+import domain.Department;
 import domain.Employee;
 import domain.SalaryGrade;
 import domain.SalaryGrades;
+import domain.enums.EmployeeJob;
+import dto.DeptJobCountDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -9,7 +12,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ScottTest {
 
@@ -56,7 +63,7 @@ public class ScottTest {
     Employee scott = entityManager.createQuery(sql, Employee.class)
         .getSingleResult();
 
-    scott.changeSalary(5000L);
+    scott.changeSalary(5000d);
     System.out.printf("%s's salary grade is %d", scott.getName(),
         scott.getSalaryGrade().getGrade());
 
@@ -82,4 +89,156 @@ public class ScottTest {
   }
 
 
+  @Test
+  public void innerJoin_Stream() {
+    // 부서이름, Job, 급여를 DTO 객체로 조회해서
+    // Stream 으로 평균을 계산한다.
+    String sql = "select new dto.DeptJobCountDto(d.name, e.job, e.salary) from Department d join d.employees e";
+    List<DeptJobCountDto> resultList = entityManager.createQuery(sql, DeptJobCountDto.class)
+        .getResultList();
+
+    Map<String, Map<EmployeeJob, Double>> results = resultList.stream()
+        .collect(Collectors.groupingBy(DeptJobCountDto::getDepartmentName,
+            Collectors.groupingBy(DeptJobCountDto::getJob, Collectors.averagingDouble(DeptJobCountDto::getAmount))));
+
+    for (String department : results.keySet()) {
+      Map<EmployeeJob, Double> employeeJobDoubleMap = results.get(department);
+      for (EmployeeJob employeeJob : employeeJobDoubleMap.keySet()) {
+        int amount = (int) Math.round(employeeJobDoubleMap.get(employeeJob));
+        int amountSize = amount / 100;
+
+        System.out.printf("%10s | %10s : ", department,
+            employeeJob);
+
+        for (int i = 0; i < amountSize; i++) {
+          System.out.print("*");
+        }
+
+        System.out.println();
+      }
+    }
+  }
+
+  @Test
+  public void innerJoin_JPA_Association_Stream() {
+    // 부서정보 조회는 JPA 연관관계로 불러온다.
+    // 평균는 Stream 으로 계산.
+    String sql = "select e from Employee e";
+    List<Employee> employees = entityManager.createQuery(sql, Employee.class)
+        .getResultList();
+
+    Map<Department, Map<EmployeeJob, Double>> results = employees.stream()
+        .collect(Collectors.groupingBy(Employee::getDepartment, Collectors.groupingBy(Employee::getJob,
+            Collectors.averagingDouble(Employee::getSalary))));
+
+    for (Department department : results.keySet()) {
+      Map<EmployeeJob, Double> employeeJobDoubleMap = results.get(department);
+      for (EmployeeJob employeeJob : employeeJobDoubleMap.keySet()) {
+        int amount = (int) Math.round(employeeJobDoubleMap.get(employeeJob));
+        int amountSize = amount / 100;
+
+        System.out.printf("%10s | %10s : ", department.getName(),
+            employeeJob);
+
+        for (int i = 0; i < amountSize; i++) {
+          System.out.print("*");
+        }
+
+        System.out.println();
+      }
+    }
+  }
+
+
+  @Test
+  public void outerJoin_Stream() {
+    // SQL의 Outer Join을 Stream으로 구현한다.
+    // 첫번째 시도 (실패)
+    // * 부서 Stream -> 부서별 직원 Stream 호출 -> Collectors.groupingBy
+    // * 실패이유 : Operation 부서가 '부서별 직원 Stream 호출' 때 사라진다.
+    //            직원 Stream의 null이면 inner join과 같은 효과가 나탄다.
+    // 두번째 시도 (성공)
+    // * 부서 List + 부서,Job 별 평균급여.
+    String sql;
+    sql = "select d from Department d";
+    List<Department> depts = entityManager.createQuery(sql, Department.class)
+        .getResultList();
+
+    sql = "select e from Employee e";
+    List<Employee> employees = entityManager.createQuery(sql, Employee.class)
+        .getResultList();
+
+    Map<Department, Map<EmployeeJob, Double>> results = employees.stream()
+        .collect(Collectors.groupingBy(Employee::getDepartment,
+            Collectors.groupingBy(Employee::getJob, Collectors.averagingDouble(Employee::getSalary))));
+
+    for (Department dept : depts) {
+      // Operation 부서는 직원이 존재하지 않기 때문에 get 실행 시, NPE가 발생한다.
+      // Optional을 사용해서 Operation 도 결과가 나타나도록 처리했다.
+      Optional.ofNullable(results.get(dept))
+          .ifPresentOrElse((employeeJobDoubleMap) -> {
+                for (EmployeeJob employeeJob : employeeJobDoubleMap.keySet()) {
+                  int amount = (int) Math.round(employeeJobDoubleMap.get(employeeJob));
+                  int amountSize = amount / 100;
+
+                  System.out.printf("%10s | %10s : ", dept.getName(),
+                      employeeJob);
+
+                  for (int i = 0; i < amountSize; i++) {
+                    System.out.print("*");
+                  }
+
+                  System.out.println();
+                }
+              },
+              () -> {
+                System.out.printf("%10s | %10s : ", dept.getName(),
+                    "Null");
+              });
+    }
+  }
+
+  @Test
+  public void crossJoin_Stream() {
+    // 모든 부서와 Job의 급여평균을 보여준다.
+    // 실행순서 : ((부서 cross join Job) left outer join 부서/Job 별 급여 평균)
+    String sql;
+
+    sql = "select e from Employee e";
+    List<Employee> employees = entityManager.createQuery(sql, Employee.class)
+        .getResultList();
+
+    Map<String, Map<EmployeeJob, Double>> data = employees.stream()
+        .collect(Collectors.groupingBy(x -> x.getDepartment().getName(),
+            Collectors.groupingBy(Employee::getJob, Collectors.averagingDouble(Employee::getSalary))));
+
+    sql = "select d from Department d";
+    // 모든 부서와 Job 은 Cross Join으로 데이터를 가져온다.
+    List<DeptJobCountDto> dtos = entityManager.createQuery(sql, Department.class)
+        .getResultStream()
+        .flatMap(x -> Arrays.stream(EmployeeJob.values())
+            .map(t -> new DeptJobCountDto(x.getName(), t)))
+        .map(x -> {
+          String departmentName = x.getDepartmentName();
+          EmployeeJob job = x.getJob();
+          Double amount = Optional.ofNullable(data.get(departmentName))
+              .map((value) -> value.getOrDefault(job, 0d))
+              .orElse(0d);
+          return new DeptJobCountDto(departmentName, job, amount);
+        })
+        .collect(Collectors.toList());
+
+    for (DeptJobCountDto dto : dtos) {
+      int amountSize = ((int) Math.round(dto.getAmount())) / 100;
+
+      System.out.printf("%10s | %10s : ", dto.getDepartmentName(),
+          dto.getJob());
+
+      for (int i = 0; i < amountSize; i++) {
+        System.out.print("*");
+      }
+
+      System.out.println();
+    }
+  }
 }

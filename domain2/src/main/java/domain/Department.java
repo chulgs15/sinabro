@@ -50,6 +50,10 @@ public class Department {
         return location;
     }
 
+    public List<Employee> getEmployees() {
+        return employees;
+    }
+
     public String printEmployeeList() {
         return employees.toString();
     }
