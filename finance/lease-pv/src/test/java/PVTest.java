@@ -3,6 +3,7 @@ import org.example.pv.domain.LeaseSchedule;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.stream.IntStream;
 
@@ -10,11 +11,12 @@ public class PVTest {
   @Test
   public void calculatePV_just_function() {
     double interestRate = 0.02d;
-    double amount = 100000000d;
-    double year = 2d;
+    double amount = 100000000;
+    double year = 2;
+    double pv = amount * Math.pow((1 + interestRate), year);
 
-    BigDecimal bigDecimal = BigDecimal.valueOf((amount * Math.pow((1d + interestRate), year)));
-    System.out.println(bigDecimal.toBigInteger());
+    String formattedPV = NumberFormat.getNumberInstance().format(pv);
+    System.out.println(formattedPV);
   }
 
   @Test
