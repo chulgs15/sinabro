@@ -1,10 +1,10 @@
 package org.example.pv.domain;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class LeaseContract {
@@ -12,7 +12,9 @@ public class LeaseContract {
     private final int periodCount;
     private final BigDecimal leaseTotalAmount;
     private final List<LeaseSchedule> schedules;
-    private BigDecimal presentValue;
+    private BigDecimal presentValue = new BigDecimal("0.0");
+    private BigDecimal leaseLiab = new BigDecimal("0.0");
+    private BigDecimal interest = new BigDecimal("0.0");
 
     public LeaseContract(double interestRate, int periodCount, double leaseTotalAmount) {
         this.interestRate = interestRate;
@@ -25,7 +27,7 @@ public class LeaseContract {
      * Lease 계약에 Payment Schedule을 추가한다.
      * 이 때 서로 연관관계를 Mapping 하는 작업도 같이 한다.
      *
-     * @param schedule
+     * @param schedule Lease Schedule 입력.
      * @throws OverflowScheduleSize Payment Schedule 이 계획한 Period 개수보다 많으면 발생한다.
      *                              periodCount 조정 혹은 추가할 Schedule의 갯수를 확인한다.
      */
@@ -42,29 +44,49 @@ public class LeaseContract {
      * 1. PV(Present Value)
      * 2. 이자(Interest)
      * 3. 리스부채(Lease Payable)
-     * <p>
-     * PV는 현재가치 계산을 사용한다.
      */
     public void calculatePV() {
-        // 일단
+        /**
+         * Important!!
+         * PV 계산은 Payment Schdule의 순서가 중요하다.
+         * 아래 총 금액이 같아도 2개의 PV는 다르다.
+         *
+         *   Case #1       Case#2
+         *   1월 100       1월 200
+         *   2월 200       2월 300
+         *   3월 300       3월 100
+         *
+         */
         this.schedules.sort(LeaseSchedule.orderByLocalDate());
 
+        // 각 Line별 PV 계산 및 총 PV 등록.
         presentValue = IntStream.rangeClosed(0, periodCount - 1)
             .boxed()
             .map(i -> this.schedules.get(i).calculateSchedulePV(i + 1))
             .reduce(BigDecimal::add)
             .orElseThrow(() -> new RuntimeException("Calculate PV Error"));
 
+        // Lease 부채와 PV의 합계는 같다.
+        // 하지만 Interest 금액은 비율과 반올림이 적용되어 단수이가 발생한다.
+        // 이 단수차이는 가장 마지막 Payment Schedule 에 적용한다.
+        // 단수차이가 발생하면 아래와 같이 계산한다.
+        //  1. 가장 마지막 Schedule 의 Lease 부채 = Lease 부채 + 단수차이
+        //  2. 가장 마지막 Schedule 의 이자비용    = 이자비용 - 단수차이
         BigDecimal leaseBalance = new BigDecimal(presentValue.toString());
         for (LeaseSchedule schedule : schedules) {
             leaseBalance = leaseBalance.subtract(
                 schedule.calculateInterestAndLeaseLiability(leaseBalance));
+
+            leaseLiab = leaseLiab.add(schedule.getLeaseLibAmount());
+            interest = interest.add(schedule.getInterestAmount());
         }
 
-        // 가장 마지막 라인에 단수차리를 적용.
-        if (!leaseBalance.equals(BigDecimal.ZERO)) {
+        if (!leaseBalance.equals(BigDecimal.ZERO.setScale(leaseBalance.scale(), RoundingMode.HALF_UP))) {
             schedules.get(schedules.size() - 1)
                 .adjustDiff(leaseBalance);
+
+            leaseLiab = leaseLiab.add(leaseBalance);
+            interest = interest.subtract(leaseBalance);
         }
     }
 
@@ -83,9 +105,9 @@ public class LeaseContract {
                 numberFormat.format(schedule.getSchedulePV()),
                 numberFormat.format(schedule.getInterestAmount()),
                 numberFormat.format(schedule.getLeaseLibAmount()),
-                numberFormat.format(
-                    Optional.ofNullable(schedule.getRoundingAmount())
-                        .orElse(BigDecimal.ZERO)));
+                schedule.getRoundingAmount() != null ?
+                    numberFormat.format(schedule.getRoundingAmount()) : ""
+            );
         }
     }
 
@@ -95,17 +117,14 @@ public class LeaseContract {
             "interestRate=" + interestRate +
             ", periodCount=" + periodCount +
             ", leaseTotalAmount=" + leaseTotalAmount +
-            ", schedules.size=" + schedules.size() +
             ", presentValue=" + presentValue +
+            ", leaseLiab=" + leaseLiab +
+            ", interest=" + interest +
             '}';
     }
 
     public double getInterestRate() {
         return interestRate;
-    }
-
-    public List<LeaseSchedule> getSchedules() {
-        return schedules;
     }
 
     public static class OverflowScheduleSize extends RuntimeException {
