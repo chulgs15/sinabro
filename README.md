@@ -7,7 +7,7 @@ JDK : jdk11
 (The purpose of this project is to create a basic example that can be used as a technology of my interest.  
 I hope it will help you get a handle on the programming by looking at the example.)
 
-## 사용기술
+## My Interest.
 1. Java
 2. JPA
 3. Oracle DB(used Scott schema)
