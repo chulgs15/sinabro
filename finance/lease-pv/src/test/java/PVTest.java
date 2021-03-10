@@ -20,7 +20,7 @@ public class PVTest {
   }
 
   @Test
-  public void calculateLeasePV_print() {
+  public void calculateLeasePV_print_differentAmount() {
     double interestRate = 0.195;
     int periodCount = 10;
     long leaseTotalAmount = IntStream.rangeClosed(1, periodCount)
@@ -44,7 +44,7 @@ public class PVTest {
   }
 
   @Test
-  public void calculateLeasePV_print2() {
+  public void calculateLeasePV_print_sameAmount() {
     double interestRate = 0.195;
     int periodCount = 12;
     long leaseTotalAmount = IntStream.rangeClosed(1, periodCount)
