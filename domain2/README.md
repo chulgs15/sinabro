@@ -33,4 +33,4 @@ Database 의 Inner/Outer/Cross Join 과 집계함수를 Java 로  구현.
 자세한 내용은 아래 Link 를 참조. (See Link for more information)
 - [Inner join Link](https://thisandthatit.blogspot.com/2021/03/scott-inner-join-java.html)
 - [Outer join Link](https://thisandthatit.blogspot.com/2021/03/scott-outer-join-java.html)
-- Cross join Link
+- [Cross join Link](https://thisandthatit.blogspot.com/2021/03/scott-cross-join-java.html)
