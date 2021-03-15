@@ -14,19 +14,19 @@ import java.util.Locale;
 @Getter
 public class CurrencyAmount {
 
-  @Column(name = "currency_code")
+  @Column(name = "currency_code", nullable = false)
   private String currency;
 
-  @Column(name = "exchange_rate")
+  @Column(name = "exchange_rate", nullable = false)
   private BigDecimal exchangeRate;
 
-  @Column(name = "amount")
+  @Column(name = "amount", nullable = false)
   private BigDecimal amount;
 
-  @Column(name = "functional_currency")
+  @Column(name = "functional_currency", nullable = false)
   private String functionalCurrency;
 
-  @Column(name = "funcional_amount")
+  @Column(name = "funcional_amount", nullable = false)
   private BigDecimal convertedAmount;
 
   public CurrencyAmount() {
