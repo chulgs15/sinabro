@@ -1,8 +1,8 @@
 import domain.embed.CurrencyAmount;
-import domain.enums.payable.InvoiceHoldType;
+import domain.payables.InvoiceHoldType;
 import domain.payables.APHold;
-import domain.payables.APItemLine;
-import domain.payables.APStandardInvoice;
+import domain.payables.ItemLine;
+import domain.payables.StandardInvoice;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class APStandardTest {
 
         CurrencyAmount amount = new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("1000"));
 
-        APStandardInvoice invoice = new APStandardInvoice.Builder()
+        StandardInvoice invoice = new StandardInvoice.Builder()
                 .vendorName("거래처 A")
                 .taxClassificationCode(12312123456L)
                 .currencyAmount(amount)
@@ -56,16 +56,16 @@ public class APStandardTest {
 
         CurrencyAmount amount = new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("1000"));
 
-        APStandardInvoice invoice = new APStandardInvoice.Builder()
+        StandardInvoice invoice = new StandardInvoice.Builder()
                 .vendorName("거래처 A")
                 .taxClassificationCode(12312123456L)
                 .currencyAmount(amount)
                 .build();
 
 
-        APItemLine item1 = new APItemLine(
+        ItemLine item1 = new ItemLine(
                 new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("300")), "");
-        APItemLine item2 = new APItemLine(
+        ItemLine item2 = new ItemLine(
                 new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("700")), "가장 큰 라인");
 
 
@@ -84,16 +84,16 @@ public class APStandardTest {
 
         CurrencyAmount amount = new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("-1000"));
 
-        APStandardInvoice invoice = new APStandardInvoice.Builder()
+        StandardInvoice invoice = new StandardInvoice.Builder()
                 .vendorName("거래처 A")
                 .taxClassificationCode(12312123456L)
                 .currencyAmount(amount)
                 .build();
 
 
-        APItemLine item1 = new APItemLine(
+        ItemLine item1 = new ItemLine(
                 new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("300")), "");
-        APItemLine item2 = new APItemLine(
+        ItemLine item2 = new ItemLine(
                 new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("700")), "가장 큰 라인");
 
 
@@ -108,7 +108,7 @@ public class APStandardTest {
 
         entityManager.clear();
 
-        invoice = entityManager.find(APStandardInvoice.class, invoice.getInvoiceId());
+        invoice = entityManager.find(StandardInvoice.class, invoice.getInvoiceId());
 
         List<APHold> holds = invoice.getHolds();
 
@@ -123,15 +123,15 @@ public class APStandardTest {
 
         CurrencyAmount amount = new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("1000"));
 
-        APStandardInvoice invoice = new APStandardInvoice.Builder()
+        StandardInvoice invoice = new StandardInvoice.Builder()
                 .vendorName("거래처 A")
                 .taxClassificationCode(12312123456L)
                 .currencyAmount(amount)
                 .build();
 
-        APItemLine item1 = new APItemLine(
+        ItemLine item1 = new ItemLine(
                 new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("300")), "");
-        APItemLine item2 = new APItemLine(
+        ItemLine item2 = new ItemLine(
                 new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("300")), "가장 큰 라인");
 
         invoice.addLine(item1).addLine(item2);
@@ -142,7 +142,7 @@ public class APStandardTest {
         entityManager.flush();
         entityManager.clear();
 
-        invoice = entityManager.find(APStandardInvoice.class, invoice.getInvoiceId());
+        invoice = entityManager.find(StandardInvoice.class, invoice.getInvoiceId());
 
         invoice.validate();
 
@@ -156,7 +156,114 @@ public class APStandardTest {
         Assertions.assertEquals(holds.get(0).getCode(), InvoiceHoldType.HOLD_02.getHoldCode());
     }
 
+    @Test
+    public void AP인보이스_세금계산_기능확인() {
+        transaction.begin();
 
+        CurrencyAmount amount = new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("1100"));
+
+        StandardInvoice invoice = new StandardInvoice.Builder()
+            .vendorName("거래처 A")
+            .taxClassificationCode(12312123456L)
+            .currencyAmount(amount)
+            .taxRate(10d)
+            .build();
+
+        ItemLine item1 = new ItemLine(
+            new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("300")), "");
+        ItemLine item2 = new ItemLine(
+            new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("700")), "가장 큰 라인");
+
+        invoice.addLine(item1).addLine(item2).calculateTax();
+
+        System.out.println(invoice);
+
+        entityManager.persist(invoice);
+        entityManager.flush();
+        entityManager.clear();
+
+        invoice = entityManager.find(StandardInvoice.class, invoice.getInvoiceId());
+
+        invoice.validate();
+
+        transaction.commit();
+
+        List<APHold> holds = invoice.getHolds();
+
+        Assertions.assertEquals(holds.size(), 0);
+    }
+
+    @Test
+    public void AP인보이스_단수차이() {
+        transaction.begin();
+
+        CurrencyAmount amount = new CurrencyAmount("USD", new BigDecimal("1103.9"), new BigDecimal("2018552.00"));
+
+        StandardInvoice invoice = new StandardInvoice.Builder()
+            .vendorName("거래처 A")
+            .taxClassificationCode(12312123456L)
+            .currencyAmount(amount)
+            .taxRate(10d)
+            .build();
+
+        ItemLine item1 = new ItemLine(
+            new CurrencyAmount("USD", new BigDecimal("1103.9"), new BigDecimal("1835047.28")), "");
+
+        invoice.addLine(item1).calculateTax();
+
+        System.out.println(invoice);
+
+        entityManager.persist(invoice);
+        entityManager.flush();
+        entityManager.clear();
+
+        invoice = entityManager.find(StandardInvoice.class, invoice.getInvoiceId());
+
+        invoice.validate();
+
+        transaction.commit();
+
+        List<APHold> holds = invoice.getHolds();
+
+        Assertions.assertEquals(holds.size(), 0);
+    }
+
+    @Test
+    public void AP인보이스_취소() {
+        transaction.begin();
+
+        CurrencyAmount amount = new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("1100"));
+
+        StandardInvoice invoice = new StandardInvoice.Builder()
+            .vendorName("거래처 A")
+            .taxClassificationCode(12312123456L)
+            .currencyAmount(amount)
+            .taxRate(10d)
+            .build();
+
+        ItemLine item1 = new ItemLine(
+            new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("300")), "");
+        ItemLine item2 = new ItemLine(
+            new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("700")), "가장 큰 라인");
+
+        invoice.addLine(item1).addLine(item2).calculateTax();
+
+        System.out.println(invoice);
+
+        entityManager.persist(invoice);
+        entityManager.flush();
+        entityManager.clear();
+
+        invoice = entityManager.find(StandardInvoice.class, invoice.getInvoiceId());
+
+        invoice.validate();
+
+        invoice.cancel();
+
+        entityManager.persist(invoice);
+
+        transaction.commit();
+    }
 
     @Test
     public void currentCurrency_and_Format() {

@@ -1,7 +1,5 @@
 package domain.payables;
 
-import domain.enums.payable.InvoiceHoldType;
-import domain.payables.abstracts.AbstractAPInvoiceEntity;
 import lombok.Getter;
 
 import javax.persistence.*;

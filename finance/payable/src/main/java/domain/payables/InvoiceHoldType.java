@@ -1,4 +1,4 @@
-package domain.enums.payable;
+package domain.payables;
 
 import lombok.Getter;
 

@@ -1,8 +1,9 @@
-package domain.payables.abstracts;
+package domain.payables;
 
 
 import domain.embed.CurrencyAmount;
-import domain.payables.APStandardInvoice;
+import domain.payables.PostedFlag;
+import domain.payables.StandardInvoice;
 import lombok.Getter;
 
 import javax.persistence.*;
@@ -13,7 +14,7 @@ import javax.persistence.*;
 @SequenceGenerator(name = "ap_invoice_line_id_s", sequenceName = "ap_invoice_line_id_s", initialValue = 1, allocationSize = 1)
 @Table(name = "ap_invoice_entries_lines_all")
 @Getter
-public class AbstractAPLineEntry {
+public abstract class AbstractAPLineEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ap_invoice_line_id_s")
@@ -26,13 +27,18 @@ public class AbstractAPLineEntry {
     @Column(name = "description")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id")
-    private APStandardInvoice invoiceEntity;
+    @Column(name = "posted_flag")
+    @Enumerated(EnumType.STRING)
+    private PostedFlag postedYn;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "invoice_id")
+//    private StandardInvoice invoiceEntity;
 
     public AbstractAPLineEntry(CurrencyAmount lineAmount, String description) {
         this.lineAmount = lineAmount;
         this.description = description;
+        this.postedYn = PostedFlag.NEW;
     }
 
     public AbstractAPLineEntry() {

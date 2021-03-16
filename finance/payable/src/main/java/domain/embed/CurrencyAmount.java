@@ -29,6 +29,10 @@ public class CurrencyAmount {
   @Column(name = "funcional_amount", nullable = false)
   private BigDecimal convertedAmount;
 
+  @Column(name = "rounding_amount")
+  private BigDecimal roundingAmount;
+
+
   public CurrencyAmount() {
   }
 
@@ -45,6 +49,32 @@ public class CurrencyAmount {
         .setScale(roundPoint, roundingMode);
 
   }
+
+  private CurrencyAmount(String currency, BigDecimal exchangeRate, BigDecimal amount,
+                         String functionalCurrency, BigDecimal convertedAmount, BigDecimal roundingAmount) {
+    this.currency = currency;
+    this.exchangeRate = exchangeRate;
+    this.amount = amount;
+    this.functionalCurrency = functionalCurrency;
+    this.convertedAmount = convertedAmount;
+    this.roundingAmount = roundingAmount;
+  }
+
+  public void adjustDiff(BigDecimal roundingAmount) {
+    this.roundingAmount = roundingAmount;
+    this.convertedAmount = this.convertedAmount.add(roundingAmount);
+  }
+
+  public CurrencyAmount createReverseAmount() {
+    return new CurrencyAmount(this.currency,
+        this.exchangeRate,
+        this.amount.multiply(new BigDecimal("-1")),
+        this.functionalCurrency,
+        this.convertedAmount.multiply(new BigDecimal("-1")),
+        this.roundingAmount
+    );
+  }
+
 
   @Override
   public String toString() {
