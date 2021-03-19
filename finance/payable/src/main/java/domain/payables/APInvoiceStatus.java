@@ -38,9 +38,7 @@ public enum APInvoiceStatus {
     }
 
     public void cancel(StandardInvoice invoice) {
-      invoice.createReverseLine();
-      invoice.changeInvoiceAmountToZero();
-      invoice.changeStatusToCancel();
+      invoice.cancelProcess();
     }
 
   }, CANCEL {

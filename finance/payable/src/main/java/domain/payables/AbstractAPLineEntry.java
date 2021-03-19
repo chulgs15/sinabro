@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "invoice_line_type")
-@SequenceGenerator(name = "ap_invoice_line_id_s", sequenceName = "ap_invoice_line_id_s", initialValue = 1, allocationSize = 1)
+@SequenceGenerator(name = "ap_invoice_line_id_s", sequenceName = "ap_invoice_line_id_s", initialValue = 1, allocationSize = 50)
 @Table(name = "ap_invoice_entries_lines_all")
 @Getter
 public abstract class AbstractAPLineEntry {

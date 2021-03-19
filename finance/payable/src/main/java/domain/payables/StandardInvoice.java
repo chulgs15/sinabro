@@ -3,11 +3,13 @@ package domain.payables;
 
 import domain.embed.CurrencyAmount;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -24,15 +26,13 @@ public class StandardInvoice extends AbstractAPInvoiceEntity {
     @Where(clause = "invoice_line_type = 'TAX'")
     private final List<TaxLine> taxLines = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "invoiceEntity", cascade = CascadeType.PERSIST)
-//    private final List<AbstractAPLineEntry> lines = new ArrayList<>();
-
     public StandardInvoice() {
         super();
     }
 
-    private StandardInvoice(String vendorName, Long taxClassificationCode, CurrencyAmount currencyAmount, double taxRate) {
-        super(vendorName, taxClassificationCode, currencyAmount, taxRate);
+    private StandardInvoice(String vendorName, Long taxClassificationCode, CurrencyAmount currencyAmount,
+                            BigDecimal taxRate, LocalDate accountingDate) {
+        super(vendorName, taxClassificationCode, currencyAmount, taxRate, accountingDate);
     }
 
     public boolean isAmountPositive() {
@@ -42,6 +42,14 @@ public class StandardInvoice extends AbstractAPInvoiceEntity {
     public StandardInvoice addLine(ItemLine line) {
         itemLines.add(line);
         line.addInvoiceEntry(this);
+        return this;
+    }
+
+    public StandardInvoice addItemLine(BigDecimal amount, String description) {
+        // 어짜피 currency와 환율은 동일하기 때문에 값만 가져온다.
+        CurrencyAmount itemAmount = new CurrencyAmount(super.getCurrencyAmount().getCurrency(),
+            super.getCurrencyAmount().getExchangeRate(), amount);
+        itemLines.add(new ItemLine(itemAmount, description, this));
         return this;
     }
 
@@ -74,17 +82,15 @@ public class StandardInvoice extends AbstractAPInvoiceEntity {
             return;
         }
 
+        Currency currency = Currency.getInstance(super.getCurrencyAmount().getCurrency());
+        int truncPoint = currency.getDefaultFractionDigits();
+
         BigDecimal totalSum = BigDecimal.ZERO;
         for (ItemLine itemLine : itemLines) {
             CurrencyAmount lineAmount = itemLine.getLineAmount();
             totalSum = totalSum.add(lineAmount.getConvertedAmount());
 
-            BigDecimal taxRate = new BigDecimal(this.getTaxRate() / 100d);
-
-            Currency currency = Currency.getInstance(lineAmount.getCurrency());
-            int truncPoint = currency.getDefaultFractionDigits();
-
-            BigDecimal taxAmount = lineAmount.getAmount().multiply(taxRate)
+            BigDecimal taxAmount = lineAmount.getAmount().multiply(super.getTaxRate())
                 .setScale(truncPoint, RoundingMode.DOWN);
 
             CurrencyAmount amount =
@@ -93,6 +99,7 @@ public class StandardInvoice extends AbstractAPInvoiceEntity {
             totalSum = totalSum.add(amount.getConvertedAmount());
 
             TaxLine taxLine = new TaxLine(amount, "세금라인", this, itemLine);
+            itemLine.addTaxline(taxLine);
 
             taxLines.add(taxLine);
         }
@@ -110,14 +117,48 @@ public class StandardInvoice extends AbstractAPInvoiceEntity {
         super.getStatus().cancel(this);
     }
 
-    void createReverseLine() {
+    void cancelProcess() {
+        createReverseLine();
+        changeInvoiceAmountZero();
+        changeStatusToCancel();
+    }
+
+    public BigDecimal getTotalLineEnteredAmount() {
+        BigDecimal totalItemAmount = this.itemLines.stream()
+            .map(x -> x.getLineAmount().getAmount())
+            .reduce(BigDecimal::add)
+            .orElse(BigDecimal.ZERO);
+
+        BigDecimal totalTaxAmount = this.taxLines.stream()
+            .map(x -> x.getLineAmount().getAmount())
+            .reduce(BigDecimal::add)
+            .orElse(BigDecimal.ZERO);
+
+        return totalItemAmount.add(totalTaxAmount);
+    }
+
+    public BigDecimal getTotalLineConvertedAmount() {
+        BigDecimal totalItemAmount = this.itemLines.stream()
+            .map(x -> x.getLineAmount().getConvertedAmount())
+            .reduce(BigDecimal::add)
+            .orElse(BigDecimal.ZERO);
+
+        BigDecimal totalTaxAmount = this.taxLines.stream()
+            .map(x -> x.getLineAmount().getConvertedAmount())
+            .reduce(BigDecimal::add)
+            .orElse(BigDecimal.ZERO);
+
+        return totalItemAmount.add(totalTaxAmount);
+    }
+
+    private void createReverseLine() {
         int size = this.itemLines.size();
         for (int i = 0; i < size; i++) {
-            CurrencyAmount reverseAmount = this.itemLines.get(i).getLineAmount().createReverseAmount();
-            ItemLine reverseItemLine = new ItemLine(reverseAmount, "취소라인", this);
+            CurrencyAmount reverseItemAmount = this.itemLines.get(i).getLineAmount().createReverseAmount();
+            ItemLine reverseItemLine = new ItemLine(reverseItemAmount, "취소라인", this);
             this.itemLines.add(reverseItemLine);
 
-            TaxLine taxLine = this.itemLines.get(i).getTaxLine().get(0);
+            TaxLine taxLine = this.itemLines.get(i).getTaxLines().get(0);
             CurrencyAmount reverseTaxAmount = taxLine.getLineAmount().createReverseAmount();
 
             TaxLine reverseTaxLine = new TaxLine(reverseTaxAmount, "취소 세금 라인", this, reverseItemLine);
@@ -125,16 +166,16 @@ public class StandardInvoice extends AbstractAPInvoiceEntity {
         }
     }
 
-    void changeInvoiceAmountToZero() {
-        super.changeInvoiceAmountZeroForCancel();
+    private void changeInvoiceAmountToZeroForCancel() {
+        super.changeInvoiceAmountZero();
     }
-
 
     public static class Builder {
         private String vendorName;
         private long taxClassificationCode;
-        private double taxRate;
+        private BigDecimal taxRate;
         private CurrencyAmount currencyAmount;
+        private LocalDate accountingDate;
 
         public Builder() {
         }
@@ -144,12 +185,17 @@ public class StandardInvoice extends AbstractAPInvoiceEntity {
             return this;
         }
 
+        public Builder accountingDate(LocalDate accountingDate) {
+            this.accountingDate = accountingDate;
+            return this;
+        }
+
         public Builder taxClassificationCode(long taxClassificationCode) {
             this.taxClassificationCode = taxClassificationCode;
             return this;
         }
 
-        public Builder taxRate(double taxRate) {
+        public Builder taxRate(BigDecimal taxRate) {
             this.taxRate = taxRate;
             return this;
         }
@@ -163,8 +209,10 @@ public class StandardInvoice extends AbstractAPInvoiceEntity {
             Objects.requireNonNull(vendorName);
             Objects.requireNonNull(currencyAmount);
 
+            this.accountingDate = this.accountingDate == null ? LocalDate.now() : this.accountingDate;
+
             return new StandardInvoice(this.vendorName,
-                    this.taxClassificationCode, this.currencyAmount, this.taxRate);
+                    this.taxClassificationCode, this.currencyAmount, this.taxRate, this.accountingDate);
         }
 
     }

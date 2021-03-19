@@ -2,16 +2,18 @@ package domain.payables;
 
 import domain.embed.CurrencyAmount;
 import lombok.Getter;
+import net.bytebuddy.asm.Advice;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "invoice_type")
-@SequenceGenerator(name = "ap_invoice_id_s", sequenceName = "ap_invoice_id_s", initialValue = 1, allocationSize = 1)
+@SequenceGenerator(name = "ap_invoice_id_s", sequenceName = "ap_invoice_id_s", initialValue = 1, allocationSize = 50)
 @Table(name = "ap_invoice_entries_all")
 @Getter
 public abstract class AbstractAPInvoiceEntity {
@@ -31,13 +33,18 @@ public abstract class AbstractAPInvoiceEntity {
   private APInvoiceStatus status;
 
   @Embedded
+  @AttributeOverride(name = "amount", column = @Column(name = "invoice_amount"))
+  @AttributeOverride(name = "convertedAmount", column = @Column(name = "invoice_func_amount"))
   private CurrencyAmount currencyAmount;
 
   @Column(name = "description")
   private String description;
 
   @Column(name = "tax_rate")
-  private Double taxRate;
+  private BigDecimal taxRate;
+
+  @Column(name = "gl_date")
+  private LocalDate AccountingDate;
 
   @OneToMany(mappedBy = "invoiceEntity", cascade = CascadeType.PERSIST)
   private List<APHold> holds = new ArrayList<>();
@@ -53,9 +60,10 @@ public abstract class AbstractAPInvoiceEntity {
   }
 
   public AbstractAPInvoiceEntity(String vendorName, Long taxClassificationCode, CurrencyAmount currencyAmount,
-                                 double taxRate) {
+                                 BigDecimal taxRate, LocalDate AccountingDate) {
     this(vendorName, taxClassificationCode, currencyAmount);
     this.taxRate = taxRate;
+    this.AccountingDate = AccountingDate;
   }
 
 
@@ -73,7 +81,7 @@ public abstract class AbstractAPInvoiceEntity {
     this.status = APInvoiceStatus.CANCEL;
   }
 
-  void changeInvoiceAmountZeroForCancel() {
+  void changeInvoiceAmountZero() {
     this.currencyAmount = new CurrencyAmount(this.currencyAmount.getCurrency(),
         this.currencyAmount.getExchangeRate(), BigDecimal.ZERO);
   }

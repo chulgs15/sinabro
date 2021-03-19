@@ -1,5 +1,7 @@
 package domain.embed;
 
+import domain.payables.exception.PayableErrors;
+import domain.payables.exception.PayableException;
 import lombok.Getter;
 
 import javax.persistence.Column;
@@ -26,7 +28,7 @@ public class CurrencyAmount {
   @Column(name = "functional_currency", nullable = false)
   private String functionalCurrency;
 
-  @Column(name = "funcional_amount", nullable = false)
+  @Column(name = "functional_amount", nullable = false)
   private BigDecimal convertedAmount;
 
   @Column(name = "rounding_amount")
@@ -40,14 +42,16 @@ public class CurrencyAmount {
     this.currency = currency;
     this.exchangeRate = exchangeRate;
     this.amount = amount;
-    this.functionalCurrency = Currency.getInstance(Locale.getDefault()).getCurrencyCode();
 
-    int roundPoint = NumberFormat.getCurrencyInstance().getMaximumFractionDigits();
-    RoundingMode roundingMode = NumberFormat.getCurrencyInstance().getRoundingMode();
+    isProperCurrencyFormat(currency, amount);
+
+    this.functionalCurrency = Currency.getInstance(Locale.getDefault()).getCurrencyCode();
+    NumberFormat currencyInstance = NumberFormat.getCurrencyInstance();
+    int roundPoint = currencyInstance.getMaximumFractionDigits();
+    RoundingMode roundingMode = currencyInstance.getRoundingMode();
 
     this.convertedAmount = amount.multiply(exchangeRate)
         .setScale(roundPoint, roundingMode);
-
   }
 
   private CurrencyAmount(String currency, BigDecimal exchangeRate, BigDecimal amount,
@@ -68,13 +72,21 @@ public class CurrencyAmount {
   public CurrencyAmount createReverseAmount() {
     return new CurrencyAmount(this.currency,
         this.exchangeRate,
-        this.amount.multiply(new BigDecimal("-1")),
+        this.amount.negate(),
         this.functionalCurrency,
-        this.convertedAmount.multiply(new BigDecimal("-1")),
+        this.convertedAmount.negate(),
         this.roundingAmount
     );
   }
 
+  public static void isProperCurrencyFormat(String currency, BigDecimal amount) {
+    int defaultFractionDigits = Currency.getInstance(currency).getDefaultFractionDigits();
+    int compareTo = amount.setScale(defaultFractionDigits, RoundingMode.UP)
+        .subtract(amount).compareTo(BigDecimal.ZERO);
+    if (compareTo != 0) {
+      throw new PayableException(PayableErrors.PAYABLE_00001);
+    }
+  }
 
   @Override
   public String toString() {

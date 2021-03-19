@@ -19,10 +19,14 @@ public class ItemLine extends AbstractAPLineEntry {
     private AbstractAPInvoiceEntity invoiceEntity;
 
     @OneToMany(mappedBy = "itemLine")
-    private List<TaxLine> taxLine = new ArrayList<>();
+    private List<TaxLine> taxLines = new ArrayList<>();
 
     public ItemLine() {
 
+    }
+
+    void addTaxline(TaxLine taxLine) {
+        taxLines.add(taxLine);
     }
 
     public ItemLine(CurrencyAmount lineAmount, String description) {
