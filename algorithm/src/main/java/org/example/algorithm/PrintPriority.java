@@ -1,58 +1,74 @@
 package org.example.algorithm;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.awt.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 public class PrintPriority {
   public static class Solution {
     public int solution(int[] priorities, int location) {
-      int answer = 1;
+      int answer = 0;
 
-      AtomicInteger integer = new AtomicInteger();
-      LinkedList<print> collect = Arrays.stream(priorities)
-          .mapToObj(x -> {
-            return new print(integer.getAndIncrement(), x);
-          })
-          .collect(Collectors.toCollection(LinkedList::new));
+      int l = location;
 
-      Comparator<print> comparator = new Comparator<print>() {
-        @Override
-        public int compare(print o1, print o2) {
-          return o2.value - o1.value ;
+      Queue<Integer> que = new LinkedList<Integer>();
+      for(int i : priorities){
+        que.add(i);
+      }
+
+      Arrays.sort(priorities);
+      int size = priorities.length-1;
+
+
+
+      while(!que.isEmpty()){
+        Integer i = que.poll();
+        if(i == priorities[size - answer]){
+          answer++;
+          l--;
+          if(l <0)
+            break;
+        }else{
+          que.add(i);
+          l--;
+          if(l<0)
+            l=que.size()-1;
         }
-      };
-
-      collect.sort(comparator);
-
-      System.out.println(collect);
-
-      for (print print : collect) {
-        if (location == print.index) {
-          break;
-        }
-        answer++;
       }
 
       return answer;
     }
 
-    class print  {
-      int index;
-      int value;
+    public int solution2(int[] priorities, int location) {
+      int answer = 1;
 
-      public print(int index, int value) {
-        this.index = index;
-        this.value = value;
+      // 최대값을 찾아 index와 값을 가져온다.
+      int maxIndex = 0;
+      int maxValue = -1;
+      for (int i = 0; i < priorities.length; i++) {
+        if (priorities[i] > maxValue) {
+          maxIndex = i;
+          maxValue = priorities[i];
+        }
       }
 
-      @Override
-      public String toString() {
-        return "print{" +
-            "index=" + index +
-            ", value=" + value +
-            '}' + "\n";
+      for (int i = maxIndex; i < priorities.length; i++) {
+        if (i == location) {
+          return i - maxIndex + 1;
+        }
       }
+
+      for (int i = 0; i < maxIndex; i++) {
+        if (i == location) {
+          return i + priorities.length - maxIndex + 1;
+        }
+      }
+
+
+      return answer;
     }
   }
 }
