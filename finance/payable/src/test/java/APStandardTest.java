@@ -1,8 +1,11 @@
 import domain.embed.CurrencyAmount;
 import domain.ledger.JournalEntry;
-import domain.payables.*;
+import domain.payables.APHold;
+import domain.payables.APInvoiceStatus;
+import domain.payables.InvoiceHoldType;
+import domain.payables.StandardInvoice;
 import domain.payables.exception.PayableException;
-import domain.xla.payable.InvoiceAccountingRule;
+import domain.xla.payable.StandardInvoiceAccounting;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -12,11 +15,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class APStandardTest {
 
@@ -247,32 +246,38 @@ public class APStandardTest {
   public void AP인보이스_CA() {
     transaction.begin();
 
-    CurrencyAmount amount = new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("1100"));
+    for (int i = 0; i < 100; i++) {
 
-    StandardInvoice invoice = new StandardInvoice.Builder()
-        .vendorName("거래처 A")
-        .taxClassificationCode(12312123456L)
-        .currencyAmount(amount)
-        .taxRate(new BigDecimal("0.1"))
-        .build()
-        .addItemLine(new BigDecimal("300"), "")
-        .addItemLine(new BigDecimal("700"), "가장 큰 라인");
+      CurrencyAmount amount = new CurrencyAmount("KRW", new BigDecimal("1"), new BigDecimal("1100"));
+
+      StandardInvoice invoice = new StandardInvoice.Builder()
+          .vendorName("거래처 A")
+          .taxClassificationCode(12312123456L)
+          .currencyAmount(amount)
+          .taxRate(new BigDecimal("0.1"))
+          .build()
+          .addItemLine(new BigDecimal("300"), "")
+          .addItemLine(new BigDecimal("700"), "가장 큰 라인");
 
 
-    invoice.calculateTax();
-    invoice.validate();
-    invoice.cancel();
+      invoice.calculateTax();
+      invoice.validate();
+      invoice.cancel();
 
-    entityManager.persist(invoice);
+      entityManager.persist(invoice);
+      entityManager.flush();
+      entityManager.clear();
+
+      invoice = entityManager.find(StandardInvoice.class, invoice.getInvoiceId());
+
+      StandardInvoiceAccounting standardInvoiceAccounting = new StandardInvoiceAccounting(invoice);
+      JournalEntry accounting = standardInvoiceAccounting.createAccounting();
+
+      entityManager.persist(accounting);
+    }
+
     entityManager.flush();
     entityManager.clear();
-
-    invoice = entityManager.find(StandardInvoice.class, invoice.getInvoiceId());
-
-    for (ItemLine itemLine : invoice.getItemLines()) {
-      JournalEntry accouting = new InvoiceAccountingRule(itemLine).createAccouting();
-      entityManager.persist(accouting);
-    }
 
     transaction.commit();
   }

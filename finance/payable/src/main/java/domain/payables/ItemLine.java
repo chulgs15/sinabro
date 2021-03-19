@@ -25,6 +25,8 @@ public class ItemLine extends AbstractAPLineEntry {
 
     }
 
+
+
     void addTaxline(TaxLine taxLine) {
         taxLines.add(taxLine);
     }
@@ -34,8 +36,9 @@ public class ItemLine extends AbstractAPLineEntry {
     }
 
     public ItemLine(CurrencyAmount lineAmount, String description, AbstractAPInvoiceEntity invoiceEntity) {
-        this(lineAmount, description);
+        super(lineAmount, description, invoiceEntity.getAccountingDate());
         this.invoiceEntity = invoiceEntity;
+
     }
 
     void addInvoiceEntry(AbstractAPInvoiceEntity invoiceEntity) {

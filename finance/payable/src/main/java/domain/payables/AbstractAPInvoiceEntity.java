@@ -2,7 +2,6 @@ package domain.payables;
 
 import domain.embed.CurrencyAmount;
 import lombok.Getter;
-import net.bytebuddy.asm.Advice;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -51,6 +50,8 @@ public abstract class AbstractAPInvoiceEntity {
 
   public AbstractAPInvoiceEntity() {
   }
+
+
 
   public AbstractAPInvoiceEntity(String vendorName, Long taxClassificationCode, CurrencyAmount currencyAmount) {
     this.status = APInvoiceStatus.NEW;

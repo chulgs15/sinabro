@@ -2,11 +2,10 @@ package domain.payables;
 
 
 import domain.embed.CurrencyAmount;
-import domain.payables.PostedFlag;
-import domain.payables.StandardInvoice;
 import lombok.Getter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -31,14 +30,30 @@ public abstract class AbstractAPLineEntry {
     @Enumerated(EnumType.STRING)
     private PostedFlag postedYn;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "invoice_id")
-//    private StandardInvoice invoiceEntity;
+    @Column(name = "gl_date")
+    private LocalDate accountingDate;
 
     public AbstractAPLineEntry(CurrencyAmount lineAmount, String description) {
         this.lineAmount = lineAmount;
         this.description = description;
         this.postedYn = PostedFlag.NEW;
+        this.accountingDate = LocalDate.now();
+    }
+
+    public AbstractAPLineEntry(CurrencyAmount lineAmount, String description, LocalDate accountingDate) {
+        this.lineAmount = lineAmount;
+        this.description = description;
+        this.postedYn = PostedFlag.NEW;
+        this.accountingDate = accountingDate;
+    }
+
+
+    public void markPostTarget() {
+        postedYn = PostedFlag.PROCESSING;
+    }
+
+    public void markPostComplete() {
+        postedYn = PostedFlag.COMPLETE;
     }
 
     public AbstractAPLineEntry() {

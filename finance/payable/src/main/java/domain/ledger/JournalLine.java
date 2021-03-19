@@ -1,7 +1,9 @@
 package domain.ledger;
 
 import domain.enums.FinancialAccount;
+import domain.xla.payable.JournalLink;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -10,6 +12,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "gl_journal_lines")
+@Getter
 @SequenceGenerator(name = "gl_journal_line_s", sequenceName = "gl_journal_line_s", initialValue = 1, allocationSize = 50)
 @ToString
 public class JournalLine {
@@ -41,6 +44,13 @@ public class JournalLine {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "journal_header_id")
   private JournalEntry journalEntry;
+
+  @OneToOne(mappedBy = "journalLine", cascade = CascadeType.ALL)
+  private JournalLink journalLink;
+
+  public void addJournalLink(JournalLink journalLink) {
+    this.journalLink = journalLink;
+  }
 
   public void addJournalEntry(JournalEntry journalEntry) {
     this.journalEntry = journalEntry;

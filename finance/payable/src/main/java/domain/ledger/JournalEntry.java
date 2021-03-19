@@ -1,6 +1,7 @@
 package domain.ledger;
 
 import lombok.Builder;
+import lombok.Getter;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import java.util.List;
 @Table(name = "gl_journal_headers")
 @SequenceGenerator(name = "gl_journal_header_s", sequenceName = "gl_journal_header_s", initialValue = 1, allocationSize = 50)
 @ToString
+@Getter
 public class JournalEntry {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gl_journal_header_s")
