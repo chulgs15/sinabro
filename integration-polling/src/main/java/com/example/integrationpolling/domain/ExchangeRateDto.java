@@ -20,9 +20,6 @@ public class ExchangeRateDto {
   @DateTimeFormat(pattern = "yyyy-MM-dd")
   private LocalDate date;
 
-  @Lob
-  private byte[] lob;
-
   public ExchangeRateDto() {
   }
 
