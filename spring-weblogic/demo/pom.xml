@@ -18,8 +18,16 @@
     <properties>
         <java.version>1.8</java.version>
     </properties>
-    <dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>internal.repo</id>
+            <name>Internal repo</name>
+            <url>file:///home/thara/testesb/in</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -38,56 +46,53 @@
         </dependency>
     </dependencies>
 
+    <!--    <build>-->
+    <!--        <finalName>myweb</finalName>-->
+    <!--        <plugins>-->
+    <!--            <plugin>-->
+    <!--                <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                <artifactId>maven-deploy-plugin</artifactId>-->
+    <!--                <version>2.8.2</version>-->
+    <!--                <configuration>-->
+    <!--                    <skip>true</skip>-->
+    <!--                </configuration>-->
+    <!--                <executions>-->
+    <!--                    <execution>-->
+    <!--                        <id>DeployToArtifactory</id>-->
+    <!--                        <phase>deploy</phase>-->
+    <!--                        <goals>-->
+    <!--                            <goal>deploy-file</goal>-->
+    <!--                        </goals>-->
+    <!--                        <configuration>-->
+    <!--                            <url>file://D:\github\sinabro\spring-weblogic\weblogic-docker\domain\base_domain\autodeploy\-->
+    <!--                            </url>-->
+    <!--                            <repositoryId>1</repositoryId>-->
+    <!--                            <file>target/myweb.war</file>-->
+    <!--                            <groupId>com.example</groupId>-->
+    <!--                            <artifactId>demo</artifactId>-->
+    <!--                            <version>0.0.1-SNAPSHOT</version>-->
+    <!--                        </configuration>-->
+    <!--                    </execution>-->
+    <!--                </executions>-->
+    <!--            </plugin>-->
+    <!--        </plugins>-->
+    <!--    </build>-->
+
     <build>
+        <finalName>myweb</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.2.1</version>
                 <configuration>
-                    <webappDirectory>file://C:\Users\comscg\Desktop\docker\weblogic\base_domain\base_domain\autodeploy\</webappDirectory>
+                    <outputDirectory>D:\github\sinabro\spring-weblogic\weblogic-docker\domain\base_domain\autodeploy\
+                    </outputDirectory>
+
                 </configuration>
+
             </plugin>
         </plugins>
     </build>
-
-<!--    <build>-->
-<!--        &lt;!&ndash;        <plugins>&ndash;&gt;-->
-<!--        &lt;!&ndash;            <plugin>&ndash;&gt;-->
-<!--        &lt;!&ndash;                <groupId>org.springframework.boot</groupId>&ndash;&gt;-->
-<!--        &lt;!&ndash;                <artifactId>spring-boot-maven-plugin</artifactId>&ndash;&gt;-->
-<!--        &lt;!&ndash;            </plugin>&ndash;&gt;-->
-<!--        &lt;!&ndash;        </plugins>&ndash;&gt;-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-deploy-plugin</artifactId>-->
-<!--                <version>2.8.2</version>-->
-<!--                <configuration>-->
-<!--                    <skip>true</skip>-->
-<!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>DeployToArtifactory</id>-->
-<!--                        <phase>deploy</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>deploy-file</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--&lt;!&ndash;                            <url>file://C:\Users\comscg\Desktop\docker\weblogic\base_domain\base_domain\autodeploy\</url>&ndash;&gt;-->
-<!--                            <repositoryId>1</repositoryId>-->
-<!--                            <file>target/${project.build.finalName}.${project.packaging}</file>-->
-<!--                            <groupId>${project.groupId}</groupId>-->
-<!--                            <artifactId>${project.artifactId}</artifactId>-->
-<!--                            <version>${project.version}</version>-->
-<!--                            <packaging>war</packaging>-->
-<!--                            <classifier>resources</classifier>-->
-<!--&lt;!&ndash;                            <pomFile>${project.build.directory}/pom/pom.xml</pomFile>&ndash;&gt;-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--    </build>-->
 
 </project>

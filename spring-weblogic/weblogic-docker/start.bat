@@ -1,0 +1,1 @@
+docker run --name wlsnode01 -d -p 7001:7001 -p 9002:9002   -e DOMAIN_NAME=base_domain  -v %cd%/domain:/u01/oracle/user_projects/domains/:z  -v %cd%/properties:/u01/oracle/properties:z  store/oracle/weblogic:12.2.1.3-dev-190111
