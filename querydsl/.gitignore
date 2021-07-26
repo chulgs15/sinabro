@@ -37,3 +37,4 @@ out/
 .vscode/
 /mysql/mysql_data/
 /gradle/
+/src/main/generated/
