@@ -1,5 +1,5 @@
 import leetcode.IntArrayLeetCode
-import kotlin.test.Test
+import org.testng.annotations.Test
 
 class TwoSumTest {
     @Test
