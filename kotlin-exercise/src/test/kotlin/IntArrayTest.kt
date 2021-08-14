@@ -1,5 +1,5 @@
 import leetcode.IntArrayLeetCode
-import org.testng.annotations.Test
+import org.junit.Test
 
 class IntArrayTest {
 
