@@ -1,6 +1,6 @@
 import leetcode.IntArrayLeetCode
 import leetcode.Solution
-import kotlin.test.Test
+import org.testng.annotations.Test
 
 class TwoSumTest {
     @Test
@@ -60,7 +60,7 @@ class TwoSumTest {
 //    [3,2,95,4,-3]
 //    92
 
-    @org.junit.Test
+    @Test
     fun case_4() {
         val nums: IntArray = intArrayOf(3,2,95,4,-3)
         val target = 92

@@ -34,6 +34,4 @@ fun main(args: Array<String>) {
     println("name = ${user.component1()}")
     println("id = ${user.component2()}")
 
-
-
 }
