@@ -31,7 +31,7 @@ public class GlobalFilter extends AbstractGatewayFilterFactory<GlobalFilter.Conf
 
             return chain.filter(exchange).then(Mono.fromRunnable(() -> {
                 if (config.isPostLogger()) {
-                    log.info("Global Filter End : response Code -> {}", response.getStatusCode());
+                    log.info("-Global Filter End : response Code > {}", response.getStatusCode());
                 }
             }));
         };
