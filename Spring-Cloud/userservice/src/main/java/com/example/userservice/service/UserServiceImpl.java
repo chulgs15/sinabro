@@ -7,16 +7,17 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-
+@Service
 public class UserServiceImpl  implements  UserService{
 
     @Autowired
     UserRepository userRepository;
 
     @Override
-    public UserDto createUser(UserDto userDto) {
+    public UserEntity createUser(UserDto userDto) {
         userDto.setUserId(UUID.randomUUID().toString());
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
@@ -25,6 +26,6 @@ public class UserServiceImpl  implements  UserService{
 
 
         userRepository.save(userEntity);
-        return null;
+        return userEntity;
     }
 }
